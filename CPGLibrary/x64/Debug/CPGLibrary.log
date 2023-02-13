@@ -1,4 +1,14 @@
 ﻿  CPGL.cpp
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(115,19): warning C4018: >=: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(121,19): warning C4018: >=: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(123,27): warning C4018: >: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(124,28): warning C4018: >: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(144,25): warning C4018: <: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(145,46): warning C4018: <: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(158,19): warning C4018: >: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(158,40): warning C4018: >: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(159,17): warning C4018: >: несоответствие типов со знаком и без знака
+D:\00_projects\CPGL\CPGLibrary\CPGL.cpp(159,36): warning C4018: >: несоответствие типов со знаком и без знака
   CPGL.hpp
   Создание кода...
 x64\Debug\CPGL.obj : warning LNK4042: объект указан более одного раза; лишние не учитываются

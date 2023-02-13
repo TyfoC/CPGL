@@ -20,6 +20,25 @@ public:
 		uint32_t	Value;
 	} Color, *PColor;
 
+	typedef struct Vector2D {
+		ptrdiff_t	X;
+		ptrdiff_t	Y;
+	} VectorD2, *PVector2D;
+
+	typedef struct Size2D {
+		ptrdiff_t	Width;
+		ptrdiff_t	Height;
+	} Size2D, *PSize2D;
+
+	class Math {
+	public:
+		template<typename T> static T Abs(const T value);
+		template<typename T> static void Swap(T& left, T& right);
+		template<typename T> static T& Min(T& left, T& right);
+		template<typename T> static T& Max(T& left, T& right);
+	};
+
+	CPGL();
 	CPGL(size_t width, size_t height, const DisplayMode displayMode = DisplayMode::RGB24);
 	CPGL(void*& buffer, size_t width, size_t height, const DisplayMode displayMode = DisplayMode::RGB24);
 	~CPGL();
@@ -34,7 +53,11 @@ public:
 
 	bool IsBufferAllocatedManually();
 
-	void DrawRectangle(const Color color, ptrdiff_t x, ptrdiff_t y, size_t width, size_t height);
+	bool IsPointOnEdge(Vector2D point, Vector2D start, Vector2D end);
+
+	void DrawRectangle(const Color color, Vector2D start, Size2D size);
+	void DrawLine(const Color color, Vector2D start, Vector2D end);				//	Bresenham's line drawing algorithm
+	void DrawTriangle(const Color color, Vector2D vertex1, Vector2D vertex2, Vector2D vertex3);	//	^^^
 
 	virtual void CopyOutputToBuffer() = 0;
 	virtual void CopyBufferToOutput() = 0;

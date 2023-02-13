@@ -1,6 +1,6 @@
 #pragma once
-#ifndef CPGL_WINAPI_HXX
-#define CPGL_WINAPI_HXX
+#ifndef CPGL_WINAPI_HPP
+#define CPGL_WINAPI_HPP
 
 #include <CPGL.hpp>
 

@@ -1,6 +1,7 @@
+#ifndef CPGL_WINAPI_HPP
 #include "CPGLWinAPI.hpp"
 
-CPGLWinAPI::CPGLWinAPI(const HDC devCtx) : CPGL(0, 0) {
+CPGLWinAPI::CPGLWinAPI(const HDC devCtx) : CPGL() {
 	m_devCtx = devCtx;
 	m_width = GetDeviceCaps(devCtx, HORZRES);
 	m_height = GetDeviceCaps(devCtx, VERTRES);
@@ -30,9 +31,11 @@ CPGLWinAPI::~CPGLWinAPI() {
 }
 
 void CPGLWinAPI::CopyOutputToBuffer() {
-	if (m_dibSection) BitBlt(m_bmpCtx, 0, 0, m_width, m_height, m_devCtx, 0, 0, SRCCOPY);
+	if (m_dibSection) BitBlt(m_bmpCtx, 0, 0, (int)m_width, (int)m_height, m_devCtx, 0, 0, SRCCOPY);
 }
 
 void CPGLWinAPI::CopyBufferToOutput() {
-	if (m_dibSection) BitBlt(m_devCtx, 0, 0, m_width, m_height, m_bmpCtx, 0, 0, SRCCOPY);
+	if (m_dibSection) BitBlt(m_devCtx, 0, 0, (int)m_width, (int)m_height, m_bmpCtx, 0, 0, SRCCOPY);
 }
+
+#endif
