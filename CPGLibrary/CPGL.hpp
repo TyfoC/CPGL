@@ -53,7 +53,7 @@ public:
 
 	bool IsBufferAllocatedManually();
 
-	bool IsPointOnEdge(Vector2D point, Vector2D start, Vector2D end);
+	bool IsPointOnTheEdge(Vector2D start, Vector2D end, Vector2D point);
 
 	void DrawRectangle(const Color color, Vector2D start, Size2D size);
 	void DrawLine(const Color color, Vector2D start, Vector2D end);				//	Bresenham's line drawing algorithm

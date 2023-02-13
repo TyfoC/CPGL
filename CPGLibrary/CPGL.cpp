@@ -103,7 +103,7 @@ bool CPGL::IsBufferAllocatedManually() {
 	return m_bufferAllocatedManually;
 }
 
-bool CPGL::IsPointOnEdge(Vector2D point, Vector2D start, Vector2D end) {
+bool CPGL::IsPointOnTheEdge(Vector2D start, Vector2D end, Vector2D point) {
 	return (point.Y - start.Y) * (end.X - start.X) - (point.X - start.X) * (end.Y - start.Y) >= 0;
 }
 
@@ -223,9 +223,9 @@ void CPGL::DrawTriangle(const Color color, Vector2D vertex1, Vector2D vertex2, V
 			py = y + 0.5f;
 
 			inside = true;
-			inside &= IsPointOnEdge({ vertex1.X, vertex1.Y }, { vertex2.X, vertex2.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
-			inside &= IsPointOnEdge({ vertex2.X, vertex2.Y }, { vertex3.X, vertex3.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
-			inside &= IsPointOnEdge({ vertex3.X, vertex3.Y }, { vertex1.X, vertex1.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
+			inside &= IsPointOnTheEdge({ vertex1.X, vertex1.Y }, { vertex2.X, vertex2.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
+			inside &= IsPointOnTheEdge({ vertex2.X, vertex2.Y }, { vertex3.X, vertex3.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
+			inside &= IsPointOnTheEdge({ vertex3.X, vertex3.Y }, { vertex1.X, vertex1.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
 
 			if (inside) {
 				if (m_displayMode == DisplayMode::RGB24) {
