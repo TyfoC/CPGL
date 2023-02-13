@@ -1,0 +1,5 @@
+﻿  CPGL.cpp
+  CPGL.hpp
+  Создание кода...
+x64\Debug\CPGL.obj : warning LNK4042: объект указан более одного раза; лишние не учитываются
+  CPGLibrary.vcxproj -> D:\00_projects\CPGL\VSCommunity\CPGL\x64\Debug\CPGLibrary.lib
