@@ -1,5 +1,5 @@
-#ifndef CPGL_HPP
-#include "CPGL.hpp"
+#ifndef CPGL_H
+#include "CPGL.h"
 
 template<typename T> T CPGL::Math::Abs(const T value) {
 	return value >= 0 ? value : -value;
@@ -56,6 +56,7 @@ CPGL::CPGL(size_t width, size_t height, const DisplayMode displayMode) {
 		break;
 	default:
 		m_buffer = 0;
+		break;
 	}
 }
 
@@ -64,8 +65,15 @@ CPGL::CPGL(void*& buffer, size_t width, size_t height, const DisplayMode display
 	m_height = height;
 	m_displayMode = displayMode;
 	m_bufferAllocatedManually = true;
-
 	m_buffer = (uint8_t*)buffer;
+
+	switch (m_displayMode) {
+	case DisplayMode::RGB24:
+		break;
+	default:
+		m_buffer = 0;
+		break;
+	}
 }
 
 CPGL::~CPGL() {
@@ -103,139 +111,93 @@ bool CPGL::IsBufferAllocatedManually() {
 	return m_bufferAllocatedManually;
 }
 
-bool CPGL::IsPointOnTheEdge(Vector2D start, Vector2D end, Vector2D point) {
-	return (point.Y - start.Y) * (end.X - start.X) - (point.X - start.X) * (end.Y - start.Y) >= 0;
+CPGL::Status CPGL::DrawPixel(const Color color, ptrdiff_t x1, ptrdiff_t y1) {
+	return DrawPixel(color, y1 * m_width + x1);
 }
 
-void CPGL::DrawRectangle(const Color color, Vector2D start, Size2D size) {
-	if (start.X < 0) {
-		size.Width += start.X;
-		start.X = 0;
-	}
-	else if (start.X >= m_width) return;
-
-	if (start.Y < 0) {
-		size.Height += start.Y;
-		start.Y = 0;
-	}
-	else if (start.Y >= m_height) return;
-
-	if (start.X + size.Width > m_width) size.Width = m_width - start.X;
-	if (start.Y + size.Height > m_height) size.Height = m_height - start.Y;
-
-	if (!m_buffer) return;
-
-	size_t colorShift = 0;
+CPGL::Status CPGL::DrawPixel(const Color color, size_t offset) {
 	switch (m_displayMode) {
 	case DisplayMode::RGB24:
-		colorShift = 3;
+		offset *= 3;
+		m_buffer[offset] = color.Value & 0xff;
+		m_buffer[offset + 1] = (color.Value >> 8) & 0xff;
+		m_buffer[offset + 2] = (color.Value >> 16) & 0xff;
 		break;
+	default:
+		return Status::UndefinedDisplayMode;
 	}
 
-	if (!colorShift) return;
-
-	uint8_t* buffPos = &m_buffer[start.Y * m_width * colorShift + start.X * colorShift];
-
-	size.Width += start.X;
-	size.Height += start.Y;
-
-	const size_t shiftedWidth = m_width * colorShift;
-	const size_t extraShiftedValue = (size.Width - start.X) * colorShift;
-	for (; (size_t)start.Y < size.Height; start.Y++) {
-		for (size_t xCopy = start.X; (size_t)xCopy < size.Width; xCopy++) {
-			if (m_displayMode == DisplayMode::RGB24) {
-				*buffPos++ = color.Value & 0xff;
-				*buffPos++ = (color.Value >> 8) & 0xff;
-				*buffPos++ = (color.Value >> 16) & 0xff;
-			}
-		}
-		buffPos = (uint8_t*)((size_t)buffPos + shiftedWidth - extraShiftedValue);
-	}
+	return Status::Success;
 }
 
-void CPGL::DrawLine(const Color color, Vector2D start, Vector2D end) {
-	if (!m_buffer) return;
-	else if (start.X > m_width || start.Y > m_height) return;
-	else if (end.X > m_width || end.Y > m_height) return;
+CPGL::Status CPGL::DrawLine(Color color, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2) {
+	const ptrdiff_t distanceX = Math::Abs(x2 - x1);
+	const ptrdiff_t distanceY = Math::Abs(y2 - y1);
+	const ptrdiff_t signX = x1 < x2 ? 1 : -1;
+	const ptrdiff_t signY = y1 < y2 ? 1 : -1;
 
-	size_t colorShift = 0;
-	switch (m_displayMode) {
-	case DisplayMode::RGB24:
-		colorShift = 3;
-		break;
-	}
+	DrawPixel(color, x2, y2);
 
-	if (!colorShift) return;
-	const size_t shiftedWidth = m_width * colorShift;
+	ptrdiff_t differenceXY = distanceX - distanceY, tmp;
+	while (x1 != x2 || y1 != y2) {
+		DrawPixel(color, x1, y1);
 
-	ptrdiff_t dx = end.X - start.X;
-	ptrdiff_t dy = end.Y - start.Y;
-
-	ptrdiff_t dLong = Math::Abs(dx);
-	ptrdiff_t dShort = Math::Abs(dy);
-
-	ptrdiff_t offsetLong = (ptrdiff_t)colorShift * (dx > 0 ? 1 : -1);
-	ptrdiff_t offsetShort = (ptrdiff_t)shiftedWidth * (dy > 0 ? 1 : -1);
-
-	if (dLong < dShort) {
-		Math::Swap(dShort, dLong);
-		Math::Swap(offsetShort, offsetLong);
-	}
-
-	ptrdiff_t error = 2 * dShort - dLong;
-	ptrdiff_t index = start.Y * shiftedWidth + start.X * colorShift;
-	const ptrdiff_t offset[] = { offsetLong, offsetLong + offsetShort };
-	const ptrdiff_t abs_d[] = { 2 * dShort, 2 * (dShort - dLong) };
-	for (ptrdiff_t i = 0; i <= dLong; ++i) {
-		if (m_displayMode == DisplayMode::RGB24) {
-			m_buffer[index] = color.Value & 0xff;
-			m_buffer[index + 1] = (color.Value >> 8) & 0xff;
-			m_buffer[index + 2] = (color.Value >> 16) & 0xff;
+		tmp = differenceXY << 1;
+		if (tmp > -distanceY) {
+			differenceXY -= distanceY;
+			x1 += signX;
 		}
-		const ptrdiff_t errorIsTooBig = error >= 0;
-		index += offset[errorIsTooBig];
-		error += abs_d[errorIsTooBig];
+		if (tmp < distanceX) {
+			differenceXY += distanceX;
+			y1 += signY;
+		}
 	}
+
+	return Status::Success;
 }
 
-void CPGL::DrawTriangle(const Color color, Vector2D vertex1, Vector2D vertex2, Vector2D vertex3) {
-	float minX = (float)Math::Min(Math::Min(vertex1.X, vertex2.X), vertex3.X);
-	float minY = (float)Math::Min(Math::Min(vertex1.Y, vertex2.Y), vertex3.Y);
-	float maxX = (float)Math::Max(Math::Max(vertex1.X, vertex2.X), vertex3.X);
-	float maxY = (float)Math::Max(Math::Max(vertex1.Y, vertex2.Y), vertex3.Y);
+CPGL::Status CPGL::DrawSquare(const Color color, ptrdiff_t x, ptrdiff_t y, ptrdiff_t width, ptrdiff_t height) {
+	const ptrdiff_t stepX = width > 0 ? 1 : -1;
+	const ptrdiff_t stepY = height > 0 ? 1 : -1;
 
-	bool inside;
-	float px, py;
-	
-	size_t colorShift = 0;
-	switch (m_displayMode) {
-	case DisplayMode::RGB24:
-		colorShift = 3;
-		break;
-	}
+	width += x;
+	height += y;
 
-	if (!colorShift) return;
-	const size_t shiftedWidth = m_width * colorShift;
+	ptrdiff_t x1;
+	for (; y != height; y += stepY) for (x1 = x; x1 != width; x1 += stepX) DrawPixel(color, x1, y);
 
-	for (ptrdiff_t x = (ptrdiff_t)minX; x < (ptrdiff_t)maxX; x++) {
-		for (ptrdiff_t y = (ptrdiff_t)minY; y < (ptrdiff_t)maxY; y++) {
-			px = x + 0.5f;
-			py = y + 0.5f;
+	return Status::Success;
+}
 
-			inside = true;
-			inside &= IsPointOnTheEdge({ vertex1.X, vertex1.Y }, { vertex2.X, vertex2.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
-			inside &= IsPointOnTheEdge({ vertex2.X, vertex2.Y }, { vertex3.X, vertex3.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
-			inside &= IsPointOnTheEdge({ vertex3.X, vertex3.Y }, { vertex1.X, vertex1.Y }, { (ptrdiff_t)px, (ptrdiff_t)py });
+CPGL::Status CPGL::DrawCircle(const Color color, ptrdiff_t x, ptrdiff_t y, size_t radius) {
+	ptrdiff_t offsetX = 0;
+	ptrdiff_t offsetY = radius;
+	ptrdiff_t f = 1 - radius;
 
-			if (inside) {
-				if (m_displayMode == DisplayMode::RGB24) {
-					m_buffer[y * shiftedWidth + x * colorShift] = color.Value & 0xff;
-					m_buffer[y * shiftedWidth + x * colorShift + 1] = (color.Value >> 8) & 0xff;
-					m_buffer[y * shiftedWidth + x * colorShift + 2] = (color.Value >> 16) & 0xff;
-				}
-			}
+	DrawLine(color, x, y, x + radius, y);
+	DrawLine(color, x, y, x - radius, y);
+	DrawLine(color, x, y, x, y + radius);
+	DrawLine(color, x, y, x, y - radius);
+
+	while (offsetX < offsetY) {
+		offsetX += 1;
+		if (f < 0) f += 2 * offsetX + 1;
+		else {
+			f += 2 * (offsetX - offsetY + 1);
+			offsetY -= 1;
 		}
+
+		DrawLine(color, x + offsetX, y + offsetX, x + offsetX, y + offsetY);
+		DrawLine(color, x - offsetX, y + offsetX, x - offsetX, y + offsetY);
+		DrawLine(color, x + offsetX, y - offsetX, x + offsetX, y - offsetY);
+		DrawLine(color, x - offsetX, y - offsetX, x - offsetX, y - offsetY);
+		DrawLine(color, x + offsetX, y + offsetX, x + offsetY, y + offsetX);
+		DrawLine(color, x + offsetX, y + offsetX, x - offsetY, y + offsetX);
+		DrawLine(color, x + offsetX, y - offsetX, x + offsetY, y - offsetX);
+		DrawLine(color, x + offsetX, y - offsetX, x - offsetY, y - offsetX);
 	}
+
+	return Status::Success;
 }
 
 #endif

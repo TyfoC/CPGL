@@ -1,5 +1,5 @@
-#ifndef CPGL_WINAPI_HPP
-#include "CPGLWinAPI.hpp"
+#ifndef CPGL_WINAPI_H
+#include "CPGLWinAPI.h"
 
 CPGLWinAPI::CPGLWinAPI(const HDC devCtx) : CPGL() {
 	m_devCtx = devCtx;
@@ -30,12 +30,28 @@ CPGLWinAPI::~CPGLWinAPI() {
 	}
 }
 
-void CPGLWinAPI::CopyOutputToBuffer() {
-	if (m_dibSection) BitBlt(m_bmpCtx, 0, 0, (int)m_width, (int)m_height, m_devCtx, 0, 0, SRCCOPY);
+CPGL::Status CPGLWinAPI::CopyOutputToBuffer() {
+	if (m_dibSection) switch (m_displayMode) {
+	case DisplayMode::RGB24:
+		BitBlt(m_bmpCtx, 0, 0, (int)m_width, (int)m_height, m_devCtx, 0, 0, SRCCOPY);
+		break;
+	default:
+		return Status::UndefinedDisplayMode;
+	}
+
+	return Status::Success;
 }
 
-void CPGLWinAPI::CopyBufferToOutput() {
-	if (m_dibSection) BitBlt(m_devCtx, 0, 0, (int)m_width, (int)m_height, m_bmpCtx, 0, 0, SRCCOPY);
+CPGL::Status CPGLWinAPI::CopyBufferToOutput() {
+	if (m_dibSection) switch (m_displayMode) {
+	case DisplayMode::RGB24:
+		BitBlt(m_devCtx, 0, 0, (int)m_width, (int)m_height, m_bmpCtx, 0, 0, SRCCOPY);
+		break;
+	default:
+		return Status::UndefinedDisplayMode;
+	}
+
+	return Status::Success;
 }
 
 #endif

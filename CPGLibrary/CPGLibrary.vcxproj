@@ -20,7 +20,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="CPGL.cpp" />
-    <ClCompile Include="CPGL.hpp" />
+    <ClInclude Include="CPGL.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Graphics2D.md" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
@@ -84,7 +87,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -104,7 +107,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -124,7 +127,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>
@@ -144,7 +147,7 @@
       <PrecompiledHeaderFile>
       </PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
     </ClCompile>
     <Link>
       <SubSystem>

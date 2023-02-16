@@ -5,6 +5,6 @@
     <ClCompile Include="CPGLWinAPI.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CPGLWinAPI.hpp" />
+    <ClInclude Include="CPGLWinAPI.h" />
   </ItemGroup>
 </Project>

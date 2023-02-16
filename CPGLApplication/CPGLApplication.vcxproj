@@ -23,7 +23,7 @@
     <ClCompile Include="Source.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="CPGLWinAPI.hpp" />
+    <ClInclude Include="CPGLWinAPI.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
