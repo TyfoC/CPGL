@@ -3,6 +3,7 @@
 #define CPGL_H
 
 #include <cstdint>
+#include <vector>
 
 class CPGL {
 public:
@@ -28,10 +29,15 @@ public:
 		uint32_t	Value;
 	} Color, *PColor;
 
-	typedef struct EdgesX {
-		ptrdiff_t*	LeftEdgesX;
-		ptrdiff_t* RightEdgesX;
-	} EdgesX, *PEdgesX;
+	typedef struct Point2D {
+		double	X;
+		double	Y;
+	} Point2D, *PPoint2D;
+
+	typedef struct Size2D {
+		double	Width;
+		double	Height;
+	} Size2D, *PSize2D;
 
 	class Math {
 	public:
@@ -39,34 +45,34 @@ public:
 		template<typename T> static void Swap(T& left, T& right);
 		template<typename T> static T& Min(T& left, T& right);
 		template<typename T> static T& Max(T& left, T& right);
+		static ptrdiff_t DoubleToLong(const double& value);
 	};
 
 	CPGL();
-	CPGL(size_t width, size_t height, const DisplayMode displayMode = DisplayMode::RGB24);
-	CPGL(void*& buffer, size_t width, size_t height, const DisplayMode displayMode = DisplayMode::RGB24);
+	CPGL(Size2D bufferSize, const DisplayMode displayMode = DisplayMode::RGB24);
+	CPGL(void*& buffer, Size2D bufferSize, const DisplayMode displayMode = DisplayMode::RGB24);
 	~CPGL();
 
-	void SetWidth(size_t width);
-	void SetHeight(size_t height);
+	void SetBufferSize(Size2D size);
 	void SetDisplayMode(const DisplayMode displayMode);
 
-	size_t GetWidth();
-	size_t GetHeight();
+	Size2D GetBufferSize();
 	DisplayMode GetDisplayMode();
 
 	bool IsBufferAllocatedManually();
 
-	Status DrawPixel(const Color color, ptrdiff_t x1, ptrdiff_t y1);
-	Status DrawPixel(const Color color, size_t offset);
-	Status DrawLine(const Color color, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2);
-	Status DrawSquare(const Color color, ptrdiff_t x, ptrdiff_t y, ptrdiff_t width, ptrdiff_t height);
-	Status DrawCircle(const Color color, ptrdiff_t x, ptrdiff_t y, size_t radius);
+	Status DrawPoint(const Color color, Point2D point);
+	Status DrawLine(const Color color, Point2D startPoint, Point2D endPoint);
+	Status DrawSquare(const Color color, Point2D leftPoint, Size2D size);
+	Status DrawCircle(const Color color, Point2D centerPoint, size_t radius);
+	Status DrawPolygon(const Color color, const Point2D* points, size_t count);
+
+	bool IsPointInPolygon(const Point2D* points, size_t count, Point2D point);
 
 	virtual Status CopyOutputToBuffer() = 0;
 	virtual Status CopyBufferToOutput() = 0;
 protected:
-	size_t		m_width;
-	size_t		m_height;
+	Size2D		m_bufferSize;
 	DisplayMode	m_displayMode;
 	uint8_t*	m_buffer;
 	bool		m_bufferAllocatedManually;

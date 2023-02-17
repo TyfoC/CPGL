@@ -3,16 +3,15 @@
 
 CPGLWinAPI::CPGLWinAPI(const HDC devCtx) : CPGL() {
 	m_devCtx = devCtx;
-	m_width = GetDeviceCaps(devCtx, HORZRES);
-	m_height = GetDeviceCaps(devCtx, VERTRES);
+	m_bufferSize = { (double)GetDeviceCaps(devCtx, HORZRES), (double)GetDeviceCaps(devCtx, VERTRES) };
 	m_displayMode = DisplayMode::RGB24;
 	m_buffer = 0;
 	m_bufferAllocatedManually = true;
 
 	BITMAPINFO bmi;
 	bmi.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	bmi.bmiHeader.biWidth = (LONG)m_width;
-	bmi.bmiHeader.biHeight = -(LONG)m_height;
+	bmi.bmiHeader.biWidth = (LONG)m_bufferSize.Width;
+	bmi.bmiHeader.biHeight = -(LONG)m_bufferSize.Height;
 	bmi.bmiHeader.biPlanes = 1;
 	bmi.bmiHeader.biBitCount = 24;
 	bmi.bmiHeader.biCompression = BI_RGB;
@@ -33,7 +32,7 @@ CPGLWinAPI::~CPGLWinAPI() {
 CPGL::Status CPGLWinAPI::CopyOutputToBuffer() {
 	if (m_dibSection) switch (m_displayMode) {
 	case DisplayMode::RGB24:
-		BitBlt(m_bmpCtx, 0, 0, (int)m_width, (int)m_height, m_devCtx, 0, 0, SRCCOPY);
+		BitBlt(m_bmpCtx, 0, 0, (int)m_bufferSize.Width, (int)m_bufferSize.Height, m_devCtx, 0, 0, SRCCOPY);
 		break;
 	default:
 		return Status::UndefinedDisplayMode;
@@ -45,7 +44,7 @@ CPGL::Status CPGLWinAPI::CopyOutputToBuffer() {
 CPGL::Status CPGLWinAPI::CopyBufferToOutput() {
 	if (m_dibSection) switch (m_displayMode) {
 	case DisplayMode::RGB24:
-		BitBlt(m_devCtx, 0, 0, (int)m_width, (int)m_height, m_bmpCtx, 0, 0, SRCCOPY);
+		BitBlt(m_devCtx, 0, 0, (int)m_bufferSize.Width, (int)m_bufferSize.Height, m_bmpCtx, 0, 0, SRCCOPY);
 		break;
 	default:
 		return Status::UndefinedDisplayMode;

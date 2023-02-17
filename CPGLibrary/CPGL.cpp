@@ -19,6 +19,10 @@ template<typename T> T& CPGL::Math::Max(T& left, T& right) {
 	return left > right ? left : right;
 }
 
+ptrdiff_t CPGL::Math::DoubleToLong(const double& value) {
+	return (ptrdiff_t)value + ((value - (double)(ptrdiff_t)value) >= 0.5 ? 1 : 0);
+}
+
 CPGL::Color::Color() {
 	Value = 0;
 }
@@ -37,22 +41,20 @@ CPGL::Color::operator uint32_t() const {
 }
 
 CPGL::CPGL() {
-	m_width = 0;
-	m_height = 0;
+	m_bufferSize = { 0, 0 };
 	m_displayMode = DisplayMode::Undefined;
 	m_bufferAllocatedManually = false;
 	m_buffer = 0;
 }
 
-CPGL::CPGL(size_t width, size_t height, const DisplayMode displayMode) {
-	m_width = width;
-	m_height = height;
+CPGL::CPGL(Size2D bufferSize, const DisplayMode displayMode) {
+	m_bufferSize = bufferSize;
 	m_displayMode = displayMode;
 	m_bufferAllocatedManually = false;
 
 	switch (m_displayMode) {
 	case DisplayMode::RGB24:
-		m_buffer = new uint8_t[width * height * 3];
+		m_buffer = new uint8_t[(size_t)(m_bufferSize.Width * m_bufferSize.Height) * 3];
 		break;
 	default:
 		m_buffer = 0;
@@ -60,9 +62,8 @@ CPGL::CPGL(size_t width, size_t height, const DisplayMode displayMode) {
 	}
 }
 
-CPGL::CPGL(void*& buffer, size_t width, size_t height, const DisplayMode displayMode) {
-	m_width = width;
-	m_height = height;
+CPGL::CPGL(void*& buffer, Size2D bufferSize, const DisplayMode displayMode) {
+	m_bufferSize = bufferSize;
 	m_displayMode = displayMode;
 	m_bufferAllocatedManually = true;
 	m_buffer = (uint8_t*)buffer;
@@ -77,30 +78,21 @@ CPGL::CPGL(void*& buffer, size_t width, size_t height, const DisplayMode display
 }
 
 CPGL::~CPGL() {
-	m_width = 0;
-	m_height = 0;
+	m_bufferSize = { 0, 0 };
 	m_displayMode = DisplayMode::Undefined;
 	if (!m_bufferAllocatedManually && m_buffer) delete[] m_buffer;
 }
 
-void CPGL::SetWidth(size_t width) {
-	m_width = width;
-}
-
-void CPGL::SetHeight(size_t height) {
-	m_height = height;
+void CPGL::SetBufferSize(Size2D bufferSize) {
+	m_bufferSize = m_bufferSize;
 }
 
 void CPGL::SetDisplayMode(const DisplayMode displayMode) {
 	m_displayMode = displayMode;
 }
 
-size_t CPGL::GetWidth() {
-	return m_width;
-}
-
-size_t CPGL::GetHeight() {
-	return m_height;
+CPGL::Size2D CPGL::GetBufferSize() {
+	return m_bufferSize;
 }
 
 CPGL::DisplayMode CPGL::GetDisplayMode() {
@@ -111,14 +103,11 @@ bool CPGL::IsBufferAllocatedManually() {
 	return m_bufferAllocatedManually;
 }
 
-CPGL::Status CPGL::DrawPixel(const Color color, ptrdiff_t x1, ptrdiff_t y1) {
-	return DrawPixel(color, y1 * m_width + x1);
-}
-
-CPGL::Status CPGL::DrawPixel(const Color color, size_t offset) {
+CPGL::Status CPGL::DrawPoint(const Color color, Point2D point) {
+	size_t offset;
 	switch (m_displayMode) {
 	case DisplayMode::RGB24:
-		offset *= 3;
+		offset = 3 * (size_t)(point.Y * m_bufferSize.Width + point.X);
 		m_buffer[offset] = color.Value & 0xff;
 		m_buffer[offset + 1] = (color.Value >> 8) & 0xff;
 		m_buffer[offset + 2] = (color.Value >> 16) & 0xff;
@@ -130,17 +119,22 @@ CPGL::Status CPGL::DrawPixel(const Color color, size_t offset) {
 	return Status::Success;
 }
 
-CPGL::Status CPGL::DrawLine(Color color, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x2, ptrdiff_t y2) {
+CPGL::Status CPGL::DrawLine(Color color, Point2D startPoint, Point2D endPoint) {
+	ptrdiff_t x1 = Math::DoubleToLong(startPoint.X);
+	ptrdiff_t y1 = Math::DoubleToLong(startPoint.Y);
+	ptrdiff_t x2 = Math::DoubleToLong(endPoint.X);
+	ptrdiff_t y2 = Math::DoubleToLong(endPoint.Y);
+
 	const ptrdiff_t distanceX = Math::Abs(x2 - x1);
 	const ptrdiff_t distanceY = Math::Abs(y2 - y1);
 	const ptrdiff_t signX = x1 < x2 ? 1 : -1;
 	const ptrdiff_t signY = y1 < y2 ? 1 : -1;
 
-	DrawPixel(color, x2, y2);
+	DrawPoint(color, { (double)x2, (double)y2 });
 
 	ptrdiff_t differenceXY = distanceX - distanceY, tmp;
 	while (x1 != x2 || y1 != y2) {
-		DrawPixel(color, x1, y1);
+		DrawPoint(color, { (double)x1, (double)y1 });
 
 		tmp = differenceXY << 1;
 		if (tmp > -distanceY) {
@@ -156,7 +150,12 @@ CPGL::Status CPGL::DrawLine(Color color, ptrdiff_t x1, ptrdiff_t y1, ptrdiff_t x
 	return Status::Success;
 }
 
-CPGL::Status CPGL::DrawSquare(const Color color, ptrdiff_t x, ptrdiff_t y, ptrdiff_t width, ptrdiff_t height) {
+CPGL::Status CPGL::DrawSquare(const Color color, Point2D leftPoint, Size2D size) {
+	ptrdiff_t x = Math::DoubleToLong(leftPoint.X);
+	ptrdiff_t y = Math::DoubleToLong(leftPoint.Y);
+	ptrdiff_t width = Math::DoubleToLong(size.Width);
+	ptrdiff_t height = Math::DoubleToLong(size.Height);
+
 	const ptrdiff_t stepX = width > 0 ? 1 : -1;
 	const ptrdiff_t stepY = height > 0 ? 1 : -1;
 
@@ -164,20 +163,22 @@ CPGL::Status CPGL::DrawSquare(const Color color, ptrdiff_t x, ptrdiff_t y, ptrdi
 	height += y;
 
 	ptrdiff_t x1;
-	for (; y != height; y += stepY) for (x1 = x; x1 != width; x1 += stepX) DrawPixel(color, x1, y);
+	for (; y != height; y += stepY) for (x1 = x; x1 != width; x1 += stepX) DrawPoint(color, { (double)x1, (double)y });
 
 	return Status::Success;
 }
 
-CPGL::Status CPGL::DrawCircle(const Color color, ptrdiff_t x, ptrdiff_t y, size_t radius) {
+CPGL::Status CPGL::DrawCircle(const Color color, Point2D centerPoint, size_t radius) {
+	ptrdiff_t x = Math::DoubleToLong(centerPoint.X);
+	ptrdiff_t y = Math::DoubleToLong(centerPoint.Y);
 	ptrdiff_t offsetX = 0;
 	ptrdiff_t offsetY = radius;
 	ptrdiff_t f = 1 - radius;
 
-	DrawLine(color, x, y, x + radius, y);
-	DrawLine(color, x, y, x - radius, y);
-	DrawLine(color, x, y, x, y + radius);
-	DrawLine(color, x, y, x, y - radius);
+	DrawLine(color, { (double)x, (double)y }, { (double)(x + radius), (double)y });
+	DrawLine(color, { (double)x, (double)y }, { (double)(x - radius), (double)y });
+	DrawLine(color, { (double)x, (double)y }, { (double)x, (double)(y + radius) });
+	DrawLine(color, { (double)x, (double)y }, { (double)x, (double)(y - radius) });
 
 	while (offsetX < offsetY) {
 		offsetX += 1;
@@ -187,17 +188,70 @@ CPGL::Status CPGL::DrawCircle(const Color color, ptrdiff_t x, ptrdiff_t y, size_
 			offsetY -= 1;
 		}
 
-		DrawLine(color, x + offsetX, y + offsetX, x + offsetX, y + offsetY);
-		DrawLine(color, x - offsetX, y + offsetX, x - offsetX, y + offsetY);
-		DrawLine(color, x + offsetX, y - offsetX, x + offsetX, y - offsetY);
-		DrawLine(color, x - offsetX, y - offsetX, x - offsetX, y - offsetY);
-		DrawLine(color, x + offsetX, y + offsetX, x + offsetY, y + offsetX);
-		DrawLine(color, x + offsetX, y + offsetX, x - offsetY, y + offsetX);
-		DrawLine(color, x + offsetX, y - offsetX, x + offsetY, y - offsetX);
-		DrawLine(color, x + offsetX, y - offsetX, x - offsetY, y - offsetX);
+		DrawLine(color, { (double)(x + offsetX), (double)(y + offsetX) }, { (double)(x + offsetX), (double)(y + offsetY) });
+		DrawLine(color, { (double)(x - offsetX), (double)(y + offsetX) }, { (double)(x - offsetX), (double)(y + offsetY) });
+		DrawLine(color, { (double)(x + offsetX), (double)(y - offsetX) }, { (double)(x + offsetX), (double)(y - offsetY) });
+		DrawLine(color, { (double)(x - offsetX), (double)(y - offsetX) }, { (double)(x - offsetX), (double)(y - offsetY) });
+		DrawLine(color, { (double)(x + offsetX), (double)(y + offsetX) }, { (double)(x + offsetY), (double)(y + offsetX) });
+		DrawLine(color, { (double)(x + offsetX), (double)(y + offsetX) }, { (double)(x - offsetY), (double)(y + offsetX) });
+		DrawLine(color, { (double)(x + offsetX), (double)(y - offsetX) }, { (double)(x + offsetY), (double)(y - offsetX) });
+		DrawLine(color, { (double)(x + offsetX), (double)(y - offsetX) }, { (double)(x - offsetY), (double)(y - offsetX) });
 	}
 
 	return Status::Success;
+}
+
+CPGL::Status CPGL::DrawPolygon(const Color color, const Point2D* points, size_t count) {
+	if (count < 3) return count == 2 ? DrawLine(color, points[0], points[1]) : Status::InvalidParameter;
+
+	ptrdiff_t minX = Math::DoubleToLong(points[0].X);
+	ptrdiff_t minY = Math::DoubleToLong(points[0].Y);
+	ptrdiff_t maxX = minX;
+	ptrdiff_t maxY = minY;
+
+	ptrdiff_t tmpX, tmpY;
+	for (size_t i = 1; i < count; i++) {
+		tmpX = Math::DoubleToLong(points[i].X);
+		tmpY = Math::DoubleToLong(points[i].Y);
+		if (tmpX < minX) minX = tmpX;
+		if (tmpX > maxX) maxX = tmpX;
+
+		if (tmpY < minY) minY = tmpY;
+		if (tmpY > maxY) maxY = tmpY;
+	}
+
+	ptrdiff_t currentX = minX;
+	for (; minY <= maxY;) {
+		if (IsPointInPolygon(points, count, { (double)currentX, (double)minY })) DrawPoint(color, { (double)currentX, (double)minY });
+
+		if (currentX <= maxX) ++currentX;
+		else {
+			currentX = 0;
+			++minY;
+		}
+	}
+
+	return Status::Success;
+}
+
+bool CPGL::IsPointInPolygon(const Point2D* points, size_t count, Point2D point) {
+	ptrdiff_t x = Math::DoubleToLong(point.X);
+	ptrdiff_t y = Math::DoubleToLong(point.Y);
+
+	bool pointInPolygon = false;
+	size_t j = count - 1;
+	ptrdiff_t slope;
+	for (size_t i = 0; i < count; i++) {
+		if (x == Math::DoubleToLong(points[i].X) && y == Math::DoubleToLong(points[i].Y)) return true;
+		else if ((Math::DoubleToLong(points[i].Y) > y) != (Math::DoubleToLong(points[j].Y) > y)) {
+			slope = Math::DoubleToLong((x - points[i].X) * (points[j].Y - points[i].Y) - (points[j].X - points[i].X) * (y - points[i].Y));
+			if (!slope) return true;
+			else if ((slope < 0) != (points[j].Y < points[i].Y)) pointInPolygon = !pointInPolygon;
+		}
+		j = i;
+	}
+
+	return pointInPolygon;
 }
 
 #endif
