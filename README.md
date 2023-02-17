@@ -1,12 +1,10 @@
 #	CPGL - Cross-Platform Graphics Library
 ##	Shapes that can be drawn:
--	*	### [x] Point
-*	### [X] Line
-	+	### [ ] Arc
-*	### [X] Square
-*	### [X] Circle
-	+	### [ ] Ellipse
-*	### [X] Polygon
+-	[x] Point
+-	[X] Line
+-	[X] Square
+-	[X] Circle
+-	[X] Polygon
 
 ##	Supported OSes
 *	###	Windows
