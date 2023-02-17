@@ -9,23 +9,21 @@ int main(int argc, char** argv) {
 	const ptrdiff_t centerX = width / 2, centerY = height / 2;
 
 	const CPGL::Point2D points[] = {
-		{ 100, 100 }, { 200, 200 }, { 100, 300 }, { 300, 400 }
+		{ 100, 100 },
+		{ 200, 200 },
+		{ 100, 300 },
+		{ 300, 400 },
+		{ 700, 700 },
+		{ 400, 50 },
+		{ 10, 800 }
 	};
 
-	while (1) {
-		devCtx.CopyOutputToBuffer();
+	(void)std::getchar();
 
-		devCtx.DrawCircle(CPGL::Color(0xff, 255, 0), { 355, 355 }, 100);
-		devCtx.DrawPolygon({ 0xff, 0xff, 0xff }, points, sizeof(points) / sizeof(points[0]));
+	devCtx.CopyOutputToBuffer();
 
-		devCtx.CopyBufferToOutput();
-		Sleep(1);
-	}
+	devCtx.DrawCircle(CPGL::Color(0xff, 255, 0), { 355, 355 }, 100);
+	devCtx.DrawPolygon({ 0xff, 0xff, 0xff }, points, sizeof(points) / sizeof(points[0]));
+
+	devCtx.CopyBufferToOutput();
 }
-
-
-
-
-
-
-// Okay, maybe you'd be interested to know about my addictions.

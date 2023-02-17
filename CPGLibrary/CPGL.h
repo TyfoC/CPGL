@@ -3,7 +3,6 @@
 #define CPGL_H
 
 #include <cstdint>
-#include <vector>
 
 class CPGL {
 public:
