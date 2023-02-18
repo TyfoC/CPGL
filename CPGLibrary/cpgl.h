@@ -91,6 +91,8 @@ typedef struct cpgl_ctx_t {
 	uint8_t* buffer;
 } cpgl_ctx_t, * pcpgl_ctx_t;
 
+extern const cpgl_color_t CpglPaletteVGA8[];
+
 #ifdef __cplusplus
 extern "C" {
 #endif

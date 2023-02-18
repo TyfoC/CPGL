@@ -1,6 +1,6 @@
 #include "cpgl.h"
 
-static const cpgl_color_t CpglPaletteVGA8[] = {
+const cpgl_color_t CpglPaletteVGA8[] = {
 	0x000000, 0x030303, 0x171717, 0x181818,
 	0xb8b8b8, 0xb9b9b9, 0xbababa, 0xbbbbbb,
 	0x7e7e7e, 0x7f7f7f, 0x828282, 0x838383,
