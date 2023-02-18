@@ -1,29 +1,23 @@
-#include <iostream>
-#include "CPGLWinAPI.h"
+#include <cpgl-windows.h>
 
 int main(int argc, char** argv) {
-	CPGLWinAPI devCtx(GetDC(0));
+	cpgl_windows_ctx_t ctx = cpgl_create_windows_context(GetDC(0));
 
-	const CPGL::Size2D bufferSize = devCtx.GetBufferSize();
-	const size_t width = (size_t)bufferSize.Width, height = (size_t)bufferSize.Height;
-	const ptrdiff_t centerX = width / 2, centerY = height / 2;
+	Sleep(1000);
 
-	const CPGL::Point2D points[] = {
-		{ 100, 100 },
-		{ 200, 200 },
-		{ 100, 300 },
-		{ 300, 400 },
-		{ 700, 700 },
-		{ 400, 50 },
-		{ 10, 800 }
-	};
+	while (true) {
+		cpgl_windows_update_buffer(ctx);
 
-	(void)std::getchar();
+		cpgl_draw_circlel(ctx.cpgl_context, CpglCreateColor(0xff, 0, 0), CpglFastStruct(cpgl_vx2l_t, 200, 200), 100);
+		cpgl_draw_linel(ctx.cpgl_context, CpglCreateColor(0xff, 0x7f, 0x3f), CpglFastStruct(cpgl_vx2l_t, 100, 100), CpglFastStruct(cpgl_vx2l_t, 300, 300));
+		cpgl_draw_squarel(ctx.cpgl_context, CPGL_COLOR_AZURE, CpglFastStruct(cpgl_vx2l_t, 400, 400), CpglFastStruct(cpgl_vx2l_t, -100, -100));
 
-	devCtx.CopyOutputToBuffer();
+		cpgl_vx2l_t vertices[] = { { 500, 500 }, { 600, 600 }, { 400, 550 } };
+		cpgl_draw_polygonl(ctx.cpgl_context, CPGL_COLOR_YELLOW, vertices, sizeof(vertices) / sizeof(vertices[0]));
 
-	devCtx.DrawCircle(CPGL::Color(0xff, 255, 0), { 355, 355 }, 100);
-	devCtx.DrawPolygon({ 0xff, 0xff, 0xff }, points, sizeof(points) / sizeof(points[0]));
+		cpgl_windows_draw_buffer(ctx);
+		Sleep(1);
+	}
 
-	devCtx.CopyBufferToOutput();
+	cpgl_free_windows_context(ctx);
 }
