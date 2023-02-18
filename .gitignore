@@ -34,3 +34,6 @@
 *.dbmld
 *.jfm
 *.opendb
+
+.vs
+/VSCommunity/CPGL/.vs

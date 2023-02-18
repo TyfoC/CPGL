@@ -5,7 +5,7 @@
     <ClCompile Include="cpgl-windows.c" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="cpgl.h" />
     <ClInclude Include="cpgl-windows.h" />
+    <ClInclude Include="cpgl.h" />
   </ItemGroup>
 </Project>
