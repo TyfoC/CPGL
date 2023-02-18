@@ -5,9 +5,6 @@
     <ClCompile Include="cpgl-windows.c" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Graphics2D.md" />
-  </ItemGroup>
-  <ItemGroup>
     <ClInclude Include="cpgl.h" />
     <ClInclude Include="cpgl-windows.h" />
   </ItemGroup>
