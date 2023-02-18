@@ -17,6 +17,8 @@ typedef uint8_t bool;
 #define true	1
 #endif
 
+#define CpglWrongIndex							((size_t)-1)
+
 #define CpglCreateColor($red, $green, $blue)	(cpgl_color_t)(((size_t)$red << 16) | ((size_t)$green << 8) | ($blue & 0xff))
 #define CpglExtractRed($color)					(uint8_t)(((size_t)$color >> 16) & 0xff)
 #define CpglExtractGreen($color)				(uint8_t)(((size_t)$color >> 8) & 0xff)
@@ -38,6 +40,7 @@ enum CpglStatuses {
 //	Display modes
 enum CpglModes {
 	CPGL_MODE_UNDEFINED,
+	CPGL_MODE_VGA8,
 	CPGL_MODE_RGB24
 };
 
@@ -103,6 +106,9 @@ extern "C" {
 	cpgl_status_t cpgl_draw_circlel(const cpgl_ctx_t context, const cpgl_color_t color, const cpgl_vx2l_t center, const ptrdiff_t radius);
 	cpgl_status_t cpgl_draw_polygonl(const cpgl_ctx_t context, const cpgl_color_t color, const cpgl_vx2l_t* vertices, size_t count);
 	bool cpgl_is_point_in_polygonl(const cpgl_vx2l_t point, const cpgl_vx2l_t* vertices, size_t count);
+
+	size_t cpgl_get_color_distance_square(const cpgl_color_t color1, const cpgl_color_t color2);
+	size_t cpgl_find_nearest_color_index(const cpgl_color_t color, const cpgl_color_t* palette, size_t count);
 #ifdef __cplusplus
 }
 #endif
