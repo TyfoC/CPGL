@@ -1,7 +1,7 @@
 #	CPGL - Cross-Platform C/C++ Graphics Library
 
-**Warning**
-There is a better version (C++ only): https://github.com/TyfoC/Eagle
+> **Warning**
+> There is a better version (C++ only): https://github.com/TyfoC/Eagle
 
 ##	Shapes that can be drawn:
 -	[x] Point
